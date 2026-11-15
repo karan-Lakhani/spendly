@@ -1,125 +1,33 @@
- ▐▛███▛█   Claude Code v2.1.316
-▝▜██████▀  Sonnet 5.5 · Claude Pro
- ▝▝   ▝▝   ~/Desktop/expense-tracker
+# CLAUDE.md
 
-  Get to finished work sooner with Opus 5.5. Switch anytime with /model.
-  1 more notice hidden
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-❯ What does this project do                                                     
+## Project
 
-  Listed 2 directories (ctrl+o to expand)
+"Spendly" is a Flask + SQLite expense tracker built as a step-by-step teaching project. Much of it is intentionally unbuilt: placeholder code is labelled with the step number that implements it ("coming in Step 7", "Students will write this file in Step 1"). Keep those step labels when touching nearby code, and replace a placeholder only when implementing its step.
 
-⏺ This is a Flask expense-tracker web app, but it's only partly built. It looks
-  like a step-by-step teaching project.
+## Commands
 
-  What exists now
-  - app.py has three working routes. / shows a landing page, /register shows the
-    registration page, and /login shows the login page. It runs on port 5001.
-  - templates/ holds base.html, landing.html, login.html and register.html.
-  - static/ has the CSS and JS, and database/db.py is the database module.
-  - The dependencies are Flask, Werkzeug, pytest and pytest-flask.
+```bash
+source venv/bin/activate          # local virtualenv (git-ignored)
+pip install -r requirements.txt
+python app.py                     # dev server, debug mode, http://localhost:5001
+pytest                            # no tests exist yet; pytest + pytest-flask are installed
+pytest tests/test_x.py::test_name # run a single test
+```
 
-  What's still a placeholder
-  These routes only return text like "coming in Step 7":
-  - logout
-  - profile
-  - add expense
-  - edit expense
-  - delete expense
+There is no linter, formatter, or build step. Port 5001 is set in `app.py` (not the Flask default 5000).
 
-  The comments say "students will implement these", so the plan seems to be user
-  accounts first, then expense create, edit and delete.
+## Architecture
 
-  I only read app.py and the file listing. I haven't opened database/db.py or
-  the templates, so I can't say how much of the database is done.
+- **`app.py`** is the only Python module with logic: it creates the `app` object and defines every route. Implemented routes (`/`, `/login`, `/register`, `/terms`, `/privacy`) only call `render_template`; the login and register forms don't yet have POST handlers. The remaining routes (`/logout`, `/profile`, `/expenses/add`, `/expenses/<id>/edit`, `/expenses/<id>/delete`) return placeholder strings.
+- **`database/db.py`** is a comment-only stub describing three functions to write: `get_db()` (SQLite connection with `row_factory` and foreign keys enabled), `init_db()` (`CREATE TABLE IF NOT EXISTS`), and `seed_db()` (sample data). Nothing imports it yet. The `.gitignore` already expects the DB file to be named `expense_tracker.db`.
+- **`templates/`**: every page extends `base.html`, which provides the navbar, footer, Google Fonts, and `style.css`. Child templates fill these blocks: `title`, `head` (extra CSS), `content`, and `scripts` (extra JS before `</body>`). Link between pages with `url_for('<function name>')`, using the route function names from `app.py` (e.g. `landing`, `login`, `register`), not hard-coded paths.
+- **`static/css/`**: `style.css` holds global styles and the CSS variables (e.g. `--accent`). `landing.css` is page-specific, loaded via the `head` block after `style.css`, and relies on that order to override it. Follow this pattern (a per-page stylesheet in `{% block head %}`) for new pages.
+- **`static/js/main.js`** is an empty placeholder loaded on every page. Page-specific JS currently lives inline in `{% block scripts %}` (see the video modal in `landing.html`).
 
-❯ What tech stack does this project use                                         
+## Conventions
 
-  Listed 1 directory (ctrl+o to expand)
-
-⏺ Backend
-  - Python with Flask 3.1.3 (Werkzeug 3.1.6 underneath).
-  - SQLite is the planned database. database/db.py is only a comment stub right
-    now. It says get_db() should return a SQLite connection, init_db() should
-    create the tables, and seed_db() should insert sample data. Nothing is
-    implemented yet.
-
-  Frontend
-  - Server-rendered Jinja2 templates in templates/, with base.html as the shared
-    layout.
-  - Plain CSS in static/css/style.css and vanilla JS in static/js/main.js. I saw
-    no frontend framework or build step.
-  - Google Fonts (DM Serif Display and DM Sans), loaded from the CDN.
-
-  Testing
-  - pytest 8.3.5 with pytest-flask 1.3.0. No test files exist yet.
-
-  Tooling
-  - A local venv, and the app runs through python app.py in debug mode on
-    port 5001.
-
-  The app is called "Spendly" in the templates. I only skimmed base.html and
-  didn't open the CSS or JS files.
-
-❯ Explain the project structure to me                                           
-
-⏺ Here's the layout. I've listed every file I've seen, and the line counts for
-  the CSS and JS files are unchecked.
-
-  expense-tracker/
-  ├── app.py                 # Flask entry point: app object + all routes
-  ├── requirements.txt       # flask, werkzeug, pytest, pytest-flask
-  ├── database/
-  │   ├── __init__.py        # makes `database` a Python package
-  │   └── db.py              # stub: get_db / init_db / seed_db (Step 1)
-  ├── templates/             # Jinja2 HTML
-  │   ├── base.html          # shared layout: head, fonts, navbar
-  │   ├── landing.html       # "/"
-  │   ├── login.html         # "/login"
-  │   └── register.html      # "/register"
-  ├── static/
-  │   ├── css/style.css      # all styling
-  │   └── js/main.js         # client-side JS
-  ├── venv/                  # local virtualenv (not source code)
-  ├── .gitignore
-  └── .git/
-
-  How the pieces fit together
-  - app.py is the only Python module with logic. It creates the Flask app and
-    defines routes. Each working route calls render_template(...) for a file in
-    templates/.
-  - Every page template extends base.html, which supplies the navbar, fonts and
-    CSS link. {% block title %} and {% block head %} are the hooks child pages
-    fill in.
-  - Static files are linked through url_for('static', filename=...), so Flask
-    serves static/ automatically.
-  - The database/ package is where data access will live. app.py will import
-    from it once it's written.
-
-  Where the unbuilt work goes
-  The placeholder routes in app.py are labelled by step. The step numbers I can
-  see are:
-  - Step 1: database setup in database/db.py.
-  - Step 3: logout.
-  - Step 4: profile.
-  - Step 7: add expense.
-  - Step 8: edit expense.
-  - Step 9: delete expense.
-
-  Steps 2, 5 and 6 aren't named in the code. Registration and login handling is
-  probably step 2, since those routes only render forms now, but that's a guess.
-
-  There's also no tests/ directory yet, even though pytest is installed. Tests
-  would probably go in a new top-level tests/ folder.
-
-❯ /resume                                                                       
-  ⎿  This conversation is from a different directory.
-
-     To resume, run:
-       cd /Users/karanlakhani/Documents/projects && claude --resume
-     1ff5d692-4b6a-4329-bf56-37211dcc1634
-
-     (Command copied to clipboard)
-
-❯ /rename expense 
-  ⎿  Session renamed to: expense
+- Currency is rupees (₹); user-facing copy uses that framing.
+- The navbar in `base.html` always shows "Sign in" and "Get started". It has no logged-in state yet. Auth (Steps 2-3) will need to change it.
+- There is no `SECRET_KEY` and no session handling yet. Login, flash messages, and logout all need one.

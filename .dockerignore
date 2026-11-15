@@ -1,0 +1,9 @@
+venv/
+__pycache__/
+*.pyc
+.git/
+.claude/
+.vscode/
+.DS_Store
+.env
+expense_tracker.db

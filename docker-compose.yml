@@ -1,0 +1,15 @@
+services:
+  spendly:
+    build: .
+    image: spendly:latest
+    container_name: spendly
+    ports:
+      - "5001:5001"
+    restart: unless-stopped
+    # SQLite file lives in /app; keep it across container recreation.
+    # (Enable once database/db.py is implemented.)
+    # volumes:
+    #   - spendly-data:/app/data
+
+# volumes:
+#   spendly-data:

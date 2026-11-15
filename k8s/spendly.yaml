@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: spendly
+  labels:
+    app: spendly
+spec:
+  # Keep at 1: the app will use a SQLite file, which can't be shared safely across pods.
+  replicas: 1
+  selector:
+    matchLabels:
+      app: spendly
+  template:
+    metadata:
+      labels:
+        app: spendly
+    spec:
+      containers:
+        - name: spendly
+          image: spendly:latest
+          # Image is built locally (docker build -t spendly:latest .), not pulled from a registry.
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 5001
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 5001
+            initialDelaySeconds: 3
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 5001
+            initialDelaySeconds: 10
+            periodSeconds: 20
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 256Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: spendly
+  labels:
+    app: spendly
+spec:
+  type: NodePort
+  selector:
+    app: spendly
+  ports:
+    - port: 5001
+      targetPort: 5001
+      nodePort: 30001
